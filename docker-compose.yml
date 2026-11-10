@@ -1,0 +1,43 @@
+# docker compose up --build   ->   http://localhost:8080
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: analytics
+      POSTGRES_PASSWORD: analytics
+      POSTGRES_DB: analytics
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U analytics"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://analytics:analytics@db:5432/analytics
+      # Put the service-account key at ./secrets/ga-service-account.json on the host.
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/ga-service-account.json
+      CORS_ORIGINS: http://localhost:8080
+    volumes:
+      - ./secrets:/secrets:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata:

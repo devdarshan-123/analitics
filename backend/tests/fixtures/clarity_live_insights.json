@@ -1,0 +1,67 @@
+[
+  {
+    "metricName": "Traffic",
+    "information": [
+      {
+        "totalSessionCount": "9554",
+        "totalBotSessionCount": "8369",
+        "distantUserCount": "227185",
+        "PagesPerSessionPercentage": 1.0,
+        "URL": "https://www.example.com/pricing/?ref=nav"
+      },
+      {
+        "totalSessionCount": "120",
+        "totalBotSessionCount": "4",
+        "distantUserCount": "98",
+        "PagesPerSessionPercentage": 2.5,
+        "URL": "https://www.example.com/"
+      }
+    ]
+  },
+  {
+    "metricName": "EngagementTime",
+    "information": [
+      { "totalTime": "271", "activeTime": "64", "URL": "https://www.example.com/pricing/?ref=nav" }
+    ]
+  },
+  {
+    "metricName": "ScrollDepth",
+    "information": [
+      { "averageScrollDepth": 47.31, "URL": "https://www.example.com/pricing/?ref=nav" }
+    ]
+  },
+  {
+    "metricName": "RageClickCount",
+    "information": [
+      {
+        "sessionsCount": "9554",
+        "sessionsWithMetricPercentage": 2.73,
+        "sessionsWithoutMetricPercentage": 97.27,
+        "pagesViews": "15231",
+        "subTotal": "512",
+        "URL": "https://www.example.com/pricing/?ref=nav"
+      }
+    ]
+  },
+  {
+    "metricName": "PageTitle",
+    "information": [
+      { "name": "404", "sessionsCount": "17" }
+    ]
+  },
+  {
+    "metricName": "BrandNewMetric",
+    "information": [
+      { "mysteryScore": "12.5", "URL": "https://www.example.com/" }
+    ]
+  },
+  {
+    "metricName": "ScriptErrorCount",
+    "information": { "sessionsCount": "40", "subTotal": "3", "nested": { "unexpected": true } }
+  },
+  "this-is-not-an-object",
+  {
+    "metricName": "DeadClickCount",
+    "information": "corrupted"
+  }
+]
