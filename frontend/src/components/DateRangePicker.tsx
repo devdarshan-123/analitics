@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { isoLocal, PRESETS, presetRange, rangeLabel, type RangeState } from "../lib/range";
+import { isoLocal, PRESETS, presetRange, rangeDates, rangeLabel, type RangeState } from "../lib/range";
 
 export function DateRangePicker({ value, onChange }: { value: RangeState; onChange: (r: RangeState) => void }) {
   const [open, setOpen] = useState(false);
@@ -36,26 +36,16 @@ export function DateRangePicker({ value, onChange }: { value: RangeState; onChan
           <rect x="3" y="5" width="18" height="16" rx="2" />
           <path d="M3 10h18M8 3v4M16 3v4" strokeLinecap="round" />
         </svg>
-        {rangeLabel(value)}
+        <span className="flex flex-col items-start leading-tight">
+          <span>{rangeLabel(value)}</span>
+          <span className="text-[11px] font-normal text-muted">{rangeDates(value)}</span>
+        </span>
         <span aria-hidden className="text-[10px] text-muted">▼</span>
       </button>
       {open && (
-        <div role="dialog" aria-label="Choose date range" className="absolute right-0 z-30 mt-2 w-64 rounded-xl border border-line bg-surface p-1.5 shadow-xl">
-          {PRESETS.map((p) => (
-            <button
-              key={p.key}
-              onClick={() => {
-                onChange({ ...value, preset: p.key, ...presetRange(p.key) });
-                setOpen(false);
-              }}
-              className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-ink hover:bg-surface-2"
-            >
-              {p.label}
-              {value.preset === p.key && <span className="font-bold text-accent" aria-label="selected">✓</span>}
-            </button>
-          ))}
-          <div className="mt-1 border-t border-line px-3 pt-3 pb-2">
-            <p className="mb-2 text-xs font-medium text-muted">Custom range</p>
+        <div role="dialog" aria-label="Choose date range" className="absolute right-0 z-30 mt-2 max-h-[75vh] w-72 overflow-y-auto rounded-xl border border-line bg-surface p-1.5 shadow-xl">
+          <div className="mb-1 border-b border-line px-3 pt-2 pb-3">
+            <p className="mb-2 text-sm font-medium text-ink">Custom</p>
             <div className="grid grid-cols-2 gap-2">
               <label className="text-xs text-ink-2">
                 From
@@ -77,6 +67,19 @@ export function DateRangePicker({ value, onChange }: { value: RangeState; onChan
               Apply
             </button>
           </div>
+          {PRESETS.map((p) => (
+            <button
+              key={p.key}
+              onClick={() => {
+                onChange({ ...value, preset: p.key, ...presetRange(p.key) });
+                setOpen(false);
+              }}
+              className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-ink hover:bg-surface-2"
+            >
+              {p.label}
+              {value.preset === p.key && <span className="font-bold text-accent" aria-label="selected">✓</span>}
+            </button>
+          ))}
         </div>
       )}
     </div>

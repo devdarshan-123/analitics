@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useClarityStatus, useLastUpdated } from "../hooks/queries";
 import { post } from "../lib/api";
 import { timeAgo } from "../lib/format";
-import type { RangeState } from "../lib/range";
+import { rangeLabel, type RangeState } from "../lib/range";
+import { useSelectedProperty } from "../lib/property";
 import { useTheme, type ThemePref } from "../lib/theme";
 import type { PropertyInfo } from "../types";
 import { DateRangePicker } from "./DateRangePicker";
@@ -51,6 +52,28 @@ function SyncBadge({ onClick }: { onClick: () => void }) {
         <span aria-hidden>{failed ? "✕" : tone === "good" ? "●" : "○"}</span>
         {label}
       </Badge>
+    </button>
+  );
+}
+
+/** Opens the live site report (GA + Clarity) for the selected property and date range in a new tab. */
+function GenerateReportButton({ range }: { range: RangeState }) {
+  const { propertyId } = useSelectedProperty();
+  const open = () => {
+    const q = new URLSearchParams({ start: range.start, end: range.end, compare: "true", label: rangeLabel(range) });
+    if (propertyId) q.set("propertyId", propertyId);
+    window.open(`/api/report/html?${q}`, "_blank", "noopener");
+  };
+  return (
+    <button
+      onClick={open}
+      title="Build a live report from Google Analytics and Microsoft Clarity for this date range"
+      className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-accent-ink hover:opacity-90"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
+        <path d="M6 3h9l5 5v13H6z M14 3v6h6 M9 14h7 M9 18h5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      Generate report
     </button>
   );
 }
@@ -140,6 +163,7 @@ export function Header({ tab, onTab, range, onRange, mockMode, properties }: {
                 Compare to previous period
               </label>
               <DateRangePicker value={range} onChange={onRange} />
+              <GenerateReportButton range={range} />
             </div>
           )}
         </div>

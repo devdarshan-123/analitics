@@ -183,6 +183,7 @@ class GAService:
         limit: int | None = None,
         order_metric: str | None = None,
         order_dim: str | None = None,
+        dimension_filter: Any = None,
     ) -> list[dict[str, Any]]:
         kwargs: dict[str, Any] = dict(
             property=self.prop,
@@ -194,6 +195,8 @@ class GAService:
         )
         if limit:
             kwargs["limit"] = limit
+        if dimension_filter is not None:
+            kwargs["dimension_filter"] = dimension_filter
         if order_metric:
             kwargs["order_bys"] = [OrderBy(metric=OrderBy.MetricOrderBy(metric_name=order_metric), desc=True)]
         elif order_dim:
@@ -216,6 +219,23 @@ class GAService:
         return self.cache.get_or_set(("ga", self.property_id, *key), ttl or self.ttl, fn)
 
     # ------------------------------------------------------------ reports
+    def report_rows(self, dims: list[str], metrics: list[str], ranges: list[tuple[DateRange, str]],
+                    limit: int | None = None, order_metric: str | None = None,
+                    event_names: list[str] | None = None) -> list[dict[str, Any]]:
+        """Generic cached report, optionally restricted to some event names (used by the site report)."""
+        def load() -> list[dict[str, Any]]:
+            flt = None
+            if event_names:
+                from google.analytics.data_v1beta.types import Filter, FilterExpression
+
+                flt = FilterExpression(filter=Filter(field_name="eventName",
+                                                     in_list_filter=Filter.InListFilter(values=event_names)))
+            return self._report(dims, metrics, ranges, limit=limit, order_metric=order_metric, dimension_filter=flt)
+
+        key = ("rows", tuple(dims), tuple(metrics), tuple((r.start, r.end, n) for r, n in ranges), limit, order_metric,
+               tuple(event_names or ()))
+        return self._cached(key, load)
+
     def overview(self, r: DateRange) -> GAOverview:
         def load() -> GAOverview:
             prev = r.previous

@@ -82,6 +82,45 @@ class MockGAService:
     def _day(self, d: date) -> dict[str, float]:
         return _day(d, self.property_id)
 
+    _MOCK_VALUES = {
+        "sessionDefaultChannelGroup": ["Organic Search", "Direct", "Referral", "Organic Social"],
+        "country": ["India", "Kenya", "United Kingdom", "Germany"],
+        "pagePath": ["/", "/buyers", "/producers", "/pricing"],
+        "pageTitle": ["Home", "Buyers", "Producers", "Pricing"],
+        "hostName": ["www.example.com", "localhost"],
+        "sessionSource": ["google", "(direct)", "linkedin.com"],
+        "eventName": ["page_view", "scroll", "form_start", "generate_lead"],
+        "city": ["Bengaluru", "Nairobi", "London"],
+        "deviceCategory": ["desktop", "mobile"],
+        "landingPage": ["/", "/buyers"],
+    }
+
+    def report_rows(self, dims: list[str], metrics: list[str], ranges: list[tuple[DateRange, str]],
+                    limit: int | None = None, order_metric: str | None = None,
+                    event_names: list[str] | None = None) -> list[dict[str, Any]]:
+        """Deterministic rows for any dimension/metric combination (used by the site report)."""
+        out: list[dict[str, Any]] = []
+        for r, name in ranges:
+            t = self._totals(r)
+            n = max(len(self._MOCK_VALUES.get(d, ["x"])) for d in dims) if dims else 1
+            for i in range(n):
+                row: dict[str, Any] = {}
+                for d in dims:
+                    vals = self._MOCK_VALUES.get(d, [f"{d}-{j}" for j in range(3)])
+                    if d == "eventName" and event_names:
+                        vals = event_names
+                    if d == "dateHourMinute":
+                        vals = [r.end.strftime("%Y%m%d") + "1042"]
+                    row[d] = vals[i % len(vals)]
+                share = 1.0 if not dims else 0.5 ** (i + 1)
+                for m in metrics:
+                    base = t.get(m, t["sessions"] * {"eventCount": 6, "userEngagementDuration": 70, "keyEvents": 0.02}.get(m, 1))
+                    row[m] = round(base * share, 4)
+                if len(ranges) > 1:
+                    row["dateRange"] = name
+                out.append(row)
+        return out[:limit] if limit else out
+
     def overview(self, r: DateRange) -> GAOverview:
         cur, prev = self._totals(r), self._totals(r.previous)
         return GAOverview(range=rng(r), previous_range=rng(r.previous), metrics=[

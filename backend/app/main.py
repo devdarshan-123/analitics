@@ -63,9 +63,9 @@ def create_app() -> FastAPI:
         return JSONResponse(status_code=422, content={"error": {"code": "invalid_request",
                                                                  "message": f"{where}: {first.get('msg', 'invalid')}", "hint": None}})
 
-    from app.routers import admin, auth, clarity, combined, ga, health, properties
+    from app.routers import admin, auth, clarity, combined, ga, health, properties, report
 
-    for r in (health.router, auth.router, properties.router, ga.router, clarity.router, combined.router, admin.router):
+    for r in (health.router, auth.router, properties.router, ga.router, clarity.router, combined.router, admin.router, report.router):
         app.include_router(r)
     return app
 

@@ -54,6 +54,12 @@ class Settings(BaseSettings):
     clarity_sync_minute: int = 0
 
     ga_cache_ttl_seconds: int = 600
+
+    # Report: hostnames/sources containing any of these (comma-separated) count as internal traffic.
+    report_internal_hosts: str = "localhost,127.0.0.1,staging."
+    # JSON {GA property ID: Clarity project ID} so report links open the right Clarity project,
+    # e.g. {"560115218": "z1tvrpoq6h"} (the ID in clarity.microsoft.com/projects/view/<id>/...).
+    clarity_project_links: str = ""
     ga_realtime_cache_ttl_seconds: int = 60
 
     log_level: str = "INFO"
@@ -65,6 +71,19 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def internal_host_patterns(self) -> list[str]:
+        return [p.strip().lower() for p in self.report_internal_hosts.split(",") if p.strip()]
+
+    def clarity_link_map(self) -> dict[str, str]:
+        import json
+
+        try:
+            data = json.loads(self.clarity_project_links) if self.clarity_project_links.strip() else {}
+        except ValueError:
+            return {}
+        return {str(k): str(v) for k, v in data.items()} if isinstance(data, dict) else {}
 
     @property
     def property_allowlist(self) -> set[str]:

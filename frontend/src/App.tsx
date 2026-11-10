@@ -4,7 +4,7 @@ import { Header, TABS, type TabId } from "./components/Header";
 import { ErrorState, Skeleton } from "./components/ui";
 import { useAuth, useProperties } from "./hooks/queries";
 import { loadSavedProperty, pickProperty, PropertyContext, saveProperty, type PropertyContextValue } from "./lib/property";
-import { presetRange, type RangeState } from "./lib/range";
+import { PRESETS, presetRange, type RangeState } from "./lib/range";
 import { Acquisition } from "./pages/Acquisition";
 import { Behaviour } from "./pages/Behaviour";
 import { Content } from "./pages/Content";
@@ -21,8 +21,8 @@ function tabFromHash(): TabId {
 function loadRange(): RangeState {
   try {
     const saved = JSON.parse(localStorage.getItem("range") ?? "null");
-    if (saved?.preset && saved.preset !== "custom") return { ...saved, ...presetRange(saved.preset) };
-    if (saved?.start && saved?.end) return saved;
+    if (saved?.preset && PRESETS.some((p) => p.key === saved.preset)) return { ...saved, ...presetRange(saved.preset) };
+    if (saved?.preset === "custom" && saved?.start && saved?.end) return saved;
   } catch {
     /* ignore */
   }
